@@ -54,8 +54,6 @@ public class DishController {
         try {
             List<Dish> dishes = dishService.getByName(name);
             return ResponseEntity.ok(dishes);
-        /*} catch (DishAlreadyExistExeption e) {
-            return ResponseEntity.badRequest().body(e.getMessage());*/
         } catch (DishNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
