@@ -19,7 +19,10 @@ public class Dish {
     }
 
 
+    // Default constructor is empty because the class only contains static methods and does not require instance creation
     public Dish() {
+        // Empty constructor
+        // This class contains only static methods and does not assume instance creation
     }
 
     public String getName() {
