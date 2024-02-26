@@ -25,7 +25,7 @@ public class DishService {
 
     private final ObjectMapper objectMapper;
     private final DishRepos dishRepos;
-    private static final Logger logger = LoggerFactory.getLogger(YourClassName.class);
+    private static final Logger logger = LoggerFactory.getLogger(DishService.class);
 
     @Autowired
     public DishService(ObjectMapper objectMapper, DishRepos dishRepos) {
