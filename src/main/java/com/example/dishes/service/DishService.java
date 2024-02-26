@@ -55,11 +55,6 @@ public class DishService {
 
     public List<Dish> getByName(String name) throws DishNotFoundException, DishAlreadyExistExeption, JsonProcessingException {
 
-        /*List<DishEntity> existingDishes = dishRepos.findByName(name);
-        if (!existingDishes.isEmpty()) {
-            throw new DishAlreadyExistExeption("Блюдо с таким названием уже существует.");
-        }*/
-
         String apiUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + URLEncoder.encode(name, StandardCharsets.UTF_8);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -74,7 +69,6 @@ public class DishService {
             List<Dish> dishes = new ArrayList<>();
             for (JsonNode mealNode : jsonNode.get("meals")) {
                 DishEntity dishEntity = new DishEntity(mealNode);
-                //dishRepos.save(dishEntity);
                 dishes.add(Dish.toModel(dishEntity));
             }
             return dishes;
