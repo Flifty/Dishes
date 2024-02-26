@@ -16,11 +16,16 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class DishService {
 
     private final ObjectMapper objectMapper;
     private final DishRepos dishRepos;
+    private static final Logger logger = LoggerFactory.getLogger(YourClassName.class);
 
     @Autowired
     public DishService(ObjectMapper objectMapper, DishRepos dishRepos) {
@@ -85,9 +90,14 @@ public class DishService {
 
     public DishEntity processJson(String jsonResponse) {
         try {
-            return objectMapper.readValue(jsonResponse, DishEntity.class);
+            if (jsonResponse != null && !jsonResponse.isEmpty()) {
+                return objectMapper.readValue(jsonResponse, DishEntity.class);
+            } else {
+                logger.warn("JSON-ответ пустой или имеет некорректный формат");
+                return null;
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Ошибка при обработке JSON", e);
             return null;
         }
     }
