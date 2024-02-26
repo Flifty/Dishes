@@ -18,6 +18,8 @@ public class DishController {
     @Value("${dishbit.api-key}")
     private String apiKey;
 
+    private static final String ERROR_MESSAGE = "Произошла ошибка";
+
     private final DishService dishService;
 
     public DishController(DishService dishService) {
@@ -32,7 +34,7 @@ public class DishController {
         } catch (DishAlreadyExistExeption e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла ошибка");
+            return ResponseEntity.badRequest().body(ERROR_MESSAGE);
         }
     }
 
@@ -43,7 +45,7 @@ public class DishController {
         } catch (DishNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла ошибка");
+            return ResponseEntity.badRequest().body(ERROR_MESSAGE);
         }
     }
 
@@ -57,7 +59,7 @@ public class DishController {
         } catch (DishNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла ошибка");
+            return ResponseEntity.badRequest().body(ERROR_MESSAGE);
         }
     }
 
@@ -67,7 +69,7 @@ public class DishController {
             dishService.delete(id);
             return ResponseEntity.ok("Блюдо было успешно удалено");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла ошибка");
+            return ResponseEntity.badRequest().body(ERROR_MESSAGE);
         }
     }
 
