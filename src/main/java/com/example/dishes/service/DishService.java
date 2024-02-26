@@ -26,6 +26,7 @@ public class DishService {
     private final ObjectMapper objectMapper;
     private final DishRepos dishRepos;
     private static final Logger logger = LoggerFactory.getLogger(DishService.class);
+    private static final String MEALS_STRING = "meals";
 
     @Autowired
     public DishService(ObjectMapper objectMapper, DishRepos dishRepos) {
@@ -65,9 +66,9 @@ public class DishService {
 
         JsonNode jsonNode = objectMapper.readTree(jsonString);
 
-        if (jsonNode.has("meals") && jsonNode.get("meals").isArray() && jsonNode.get("meals").size() > 0) {
+        if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && jsonNode.get(MEALS_STRING).size() > 0) {
             List<Dish> dishes = new ArrayList<>();
-            for (JsonNode mealNode : jsonNode.get("meals")) {
+            for (JsonNode mealNode : jsonNode.get(MEALS_STRING)) {
                 DishEntity dishEntity = new DishEntity(mealNode);
                 dishes.add(Dish.toModel(dishEntity));
             }
