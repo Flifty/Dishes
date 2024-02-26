@@ -62,9 +62,9 @@ public class DishService {
 
         String jsonString = restTemplate.getForObject(apiUrl, String.class);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
 
-        JsonNode jsonNode = objectMapper.readTree(jsonString);
+        JsonNode jsonNode = mapper.readTree(jsonString);
 
         if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && jsonNode.get(MEALS_STRING).size() > 0) {
             List<Dish> dishes = new ArrayList<>();
