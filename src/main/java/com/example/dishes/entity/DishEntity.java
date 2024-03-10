@@ -1,12 +1,13 @@
 package com.example.dishes.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
+@Table
 public class DishEntity {
 
     @Id
@@ -16,6 +17,15 @@ public class DishEntity {
     private String country;
     private String category;
     private String instruction;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "dish")
+    private List<ImageEntity> imageList = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "DISH_INGREDIENT_MAPPING",
+            joinColumns = @JoinColumn(name = "dishId"),
+            inverseJoinColumns = @JoinColumn(name = "ingredientId"))
+    private List<IngredientEntity> ingredientList = new ArrayList<>();
 
     public DishEntity() {
     }
@@ -67,4 +77,19 @@ public class DishEntity {
         this.instruction = instruction;
     }
 
+    public List<ImageEntity> getImageList() {
+        return imageList;
+    }
+
+    public void setImageList(List<ImageEntity> imageList) {
+        this.imageList = imageList;
+    }
+
+    public List<IngredientEntity> getIngredientList() {
+        return ingredientList;
+    }
+
+    public void setIngredientList(List<IngredientEntity> ingredientList) {
+        this.ingredientList = ingredientList;
+    }
 }
