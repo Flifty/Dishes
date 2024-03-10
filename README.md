@@ -48,7 +48,7 @@
 3. Запустите приложение:
 
     ```bash
-    java -jar target/weather-api-1.0.0.jar
+    java -jar target/dishes-api-1.0.0.jar
     ```
 
 Приложение будет запущено на `http://localhost:8080`.
