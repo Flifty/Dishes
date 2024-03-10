@@ -2,27 +2,45 @@ package com.example.dishes.model;
 
 import com.example.dishes.entity.DishEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Dish {
     private String name;
     private String category;
     private String country;
     private String instruction;
-
+    private List<Image> imagesList = new ArrayList<>();
+    private List<Ingredient> ingredientsList = new ArrayList<>();
 
     public static Dish toModel(DishEntity entity) {
         Dish model = new Dish();
+
         model.setName(entity.getName());
         model.setCountry(entity.getCountry());
         model.setCategory(entity.getCategory());
         model.setInstruction(entity.getInstruction());
+        if(model.getImagesList() != null)
+            model.setImagesList(entity.getImageList().stream().map(Image::toModel).toList());
+        if(model.getIngredientsList() != null)
+            model.setIngredientsList(entity.getIngredientList().stream().map(Ingredient::toModel).toList());
+
         return model;
     }
 
+    public static Dish toOldModel(DishEntity entity) {
+        Dish oldModel = new Dish();
 
-    // Default constructor is empty because the class only contains static methods and does not require instance creation
+        oldModel.setName(entity.getName());
+        oldModel.setCountry(entity.getCountry());
+        oldModel.setCategory(entity.getCategory());
+        oldModel.setInstruction(entity.getInstruction());
+
+        return oldModel;
+    }
+
     public Dish() {
-        // Empty constructor
-        // This class contains only static methods and does not assume instance creation
+        // No initialization logic needed for this constructor
     }
 
     public String getName() {
@@ -57,4 +75,19 @@ public class Dish {
         this.instruction = instruction;
     }
 
+    public List<Image> getImagesList() {
+        return imagesList;
+    }
+
+    public void setImagesList(List<Image> imageList) {
+        this.imagesList = imageList;
+    }
+
+    public List<Ingredient> getIngredientsList() {
+        return ingredientsList;
+    }
+
+    public void setIngredientsList(List<Ingredient> ingredientsList) {
+        this.ingredientsList = ingredientsList;
+    }
 }
