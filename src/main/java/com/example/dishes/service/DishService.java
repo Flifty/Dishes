@@ -1,7 +1,7 @@
 package com.example.dishes.service;
 
 import com.example.dishes.entity.DishEntity;
-import com.example.dishes.exception.DishAlreadyExistExeption;
+import com.example.dishes.exception.DishAlreadyExistException;
 import com.example.dishes.exception.DishNotFoundException;
 import com.example.dishes.model.Dish;
 import com.example.dishes.repository.DishRepos;
@@ -17,15 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Service
 public class DishService {
 
     private final ObjectMapper objectMapper;
     private final DishRepos dishRepos;
-    private static final Logger logger = LoggerFactory.getLogger(DishService.class);
     private static final String MEALS_STRING = "meals";
 
     @Autowired
@@ -34,27 +30,22 @@ public class DishService {
         this.dishRepos = dishRepos;
     }
 
-    public DishEntity add(DishEntity dish) throws DishAlreadyExistExeption {
-        List<DishEntity> dishes = dishRepos.findByName(dish.getName());
-        if (!dishes.isEmpty()) {
-            throw new DishAlreadyExistExeption("Блюдо с таким названием уже существует");
+    public void addDish(DishEntity dish) throws DishAlreadyExistException {
+        if (dishRepos.findByName(dish.getName()) != null) {
+            throw new DishAlreadyExistException("Такое блюдо уже существует");
         }
-        return dishRepos.save(dish);
+        dishRepos.save(dish);
     }
 
-    public List<Dish> getFromDb(String name) throws DishNotFoundException {
-        List<DishEntity> dishList = dishRepos.findByName(name);
-
-        if (dishList.isEmpty()) {
-            throw new DishNotFoundException("Блюдо с таким названием не было найдено");
+    public Dish getDish(String name) throws DishNotFoundException {
+        DishEntity dish = dishRepos.findByName(name);
+        if (dish == null) {
+            throw new DishNotFoundException("Блюдо не найдено");
         }
-
-        return dishList.stream()
-                .map(Dish::toModel)
-                .toList();
+        return Dish.toModel(dish);
     }
 
-    public List<Dish> getByName(String name) throws DishNotFoundException, DishAlreadyExistExeption, JsonProcessingException {
+    public List<Dish> getByName(String name) throws DishNotFoundException, JsonProcessingException {
 
         String apiUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + URLEncoder.encode(name, StandardCharsets.UTF_8);
 
@@ -66,11 +57,11 @@ public class DishService {
 
         JsonNode jsonNode = mapper.readTree(jsonString);
 
-        if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && jsonNode.get(MEALS_STRING).size() > 0) {
+        if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && !jsonNode.get(MEALS_STRING).isEmpty()) {
             List<Dish> dishes = new ArrayList<>();
             for (JsonNode mealNode : jsonNode.get(MEALS_STRING)) {
                 DishEntity dishEntity = new DishEntity(mealNode);
-                dishes.add(Dish.toModel(dishEntity));
+                dishes.add(Dish.toOldModel(dishEntity));
             }
             return dishes;
         } else {
@@ -78,23 +69,24 @@ public class DishService {
         }
     }
 
-    public Long delete(Long id) {
-       dishRepos.deleteById(id);
-       return id;
+    public void updateDish(String name, DishEntity dish) throws DishNotFoundException {
+        DishEntity dishEntity = dishRepos.findByName(name);
+        if (dishEntity == null) {
+            throw new DishNotFoundException("Блюдо не найдено");
+        }
+        dishEntity.setName(dish.getName());
+        dishEntity.setCountry(dish.getCountry());
+        dishEntity.setCategory(dish.getCategory());
+        dishEntity.setInstruction(dish.getInstruction());
+        dishRepos.save(dishEntity);
     }
 
-    public DishEntity processJson(String jsonResponse) {
-        try {
-            if (jsonResponse != null && !jsonResponse.isEmpty()) {
-                return objectMapper.readValue(jsonResponse, DishEntity.class);
-            } else {
-                logger.warn("JSON-ответ пустой или имеет некорректный формат");
-                return null;
-            }
-        } catch (Exception e) {
-            logger.error("Ошибка при обработке JSON", e);
-            return null;
+    public void deleteDish(Long id) throws DishNotFoundException {
+        DishEntity dishEntity = dishRepos.findById(id).orElse(null);
+        if (dishEntity != null) {
+            dishRepos.deleteById(id);
+        } else {
+            throw new DishNotFoundException("Блюдо не найдено");
         }
     }
-
 }
