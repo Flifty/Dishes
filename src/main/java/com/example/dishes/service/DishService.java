@@ -23,6 +23,7 @@ public class DishService {
     private final ObjectMapper objectMapper;
     private final DishRepos dishRepos;
     private static final String MEALS_STRING = "meals";
+    private static final String DISH_NOT_FOUND_STRING = "Блюдо не найдено";
 
     @Autowired
     public DishService(ObjectMapper objectMapper, DishRepos dishRepos) {
@@ -40,7 +41,7 @@ public class DishService {
     public Dish getDish(String name) throws DishNotFoundException {
         DishEntity dish = dishRepos.findByName(name);
         if (dish == null) {
-            throw new DishNotFoundException("Блюдо не найдено");
+            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }
         return Dish.toModel(dish);
     }
@@ -65,14 +66,14 @@ public class DishService {
             }
             return dishes;
         } else {
-            throw new DishNotFoundException("Блюдо с таким названием не было найдено.");
+            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }
     }
 
     public void updateDish(String name, DishEntity dish) throws DishNotFoundException {
         DishEntity dishEntity = dishRepos.findByName(name);
         if (dishEntity == null) {
-            throw new DishNotFoundException("Блюдо не найдено");
+            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }
         dishEntity.setName(dish.getName());
         dishEntity.setCountry(dish.getCountry());
@@ -86,7 +87,7 @@ public class DishService {
         if (dishEntity != null) {
             dishRepos.deleteById(id);
         } else {
-            throw new DishNotFoundException("Блюдо не найдено");
+            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }
     }
 }

@@ -18,6 +18,7 @@ public class ImageService {
 
     private final ImageRepos imageRepos;
     private final DishRepos dishRepos;
+    private static final String IMAGE_NOT_FOUND_STRING = "Изображение не найдено";
 
     @Autowired
     public ImageService(ImageRepos imageRepos, DishRepos dishRepos) {
@@ -43,7 +44,7 @@ public class ImageService {
         if (image != null) {
             return Image.toModel(image);
         } else {
-            throw new ImageNotFoundException("Изображение не найдено");
+            throw new ImageNotFoundException(IMAGE_NOT_FOUND_STRING);
         }
     }
 
@@ -53,7 +54,7 @@ public class ImageService {
             imageEntity.setPicture(image.getPicture());
             imageRepos.save(imageEntity);
         } else {
-            throw new ImageNotFoundException("Изображение не найдено");
+            throw new ImageNotFoundException(IMAGE_NOT_FOUND_STRING);
         }
     }
 
@@ -65,7 +66,7 @@ public class ImageService {
             dishRepos.save(imageEntity.getDish());
             imageRepos.deleteById(id);
         } else {
-            throw new ImageNotFoundException("Изображение не найдено");
+            throw new ImageNotFoundException(IMAGE_NOT_FOUND_STRING);
         }
     }
 }

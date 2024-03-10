@@ -17,6 +17,7 @@ public class IngredientService {
 
     private final IngredientRepos ingredientRepos;
     private final DishRepos dishRepos;
+    private static final String INGREDIENT_NOT_FOUND_STRING = "Ингредиент не найден";
 
     @Autowired
     public IngredientService(IngredientRepos ingredientRepos, DishRepos dishRepos) {
@@ -51,7 +52,7 @@ public class IngredientService {
         if (ingredient != null) {
             return Ingredient.toModel(ingredient);
         } else {
-            throw new IngredientNotFoundException("Ингредиент не найден");
+            throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
         }
     }
 
@@ -61,7 +62,7 @@ public class IngredientService {
             ingredientEntity.setName(ingredient.getName());
             ingredientRepos.save(ingredientEntity);
         } else {
-            throw new IngredientNotFoundException("Ингредиент не найден");
+            throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
         }
     }
 
@@ -73,7 +74,7 @@ public class IngredientService {
 
         IngredientEntity ingredientEntity = ingredientRepos.findById(ingredientId).orElse(null);
         if (ingredientEntity == null)
-            throw new IngredientNotFoundException("Ингредиент не найден");
+            throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
 
         dishEntity.getIngredientList().remove(ingredientEntity);
         dishRepos.save(dishEntity);
