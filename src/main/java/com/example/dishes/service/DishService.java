@@ -67,7 +67,7 @@ public class DishService {
             if (dishes.isEmpty()) {
                 throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
             }
-            List<DishDTO> dishDTOs = dishes.stream().map(DishDTO::toModel).collect(Collectors.toList());
+            List<DishDTO> dishDTOs = dishes.stream().map(DishDTO::toModel).toList();
             dishCache.putList(cacheKey, dishDTOs);
             return dishDTOs;
         }
