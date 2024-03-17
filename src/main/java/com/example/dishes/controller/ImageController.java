@@ -1,6 +1,6 @@
 package com.example.dishes.controller;
 
-import com.example.dishes.entity.ImageEntity;
+import com.example.dishes.entity.Image;
 import com.example.dishes.exception.DishNotFoundException;
 import com.example.dishes.exception.ImageAlreadyExistException;
 import com.example.dishes.exception.ImageNotFoundException;
@@ -22,7 +22,7 @@ public class ImageController {
     private static final String ERROR_MESSAGE = "Произошла ошибка";
 
     @PostMapping
-    public ResponseEntity<?> addImage(@RequestParam Long dishId, @RequestBody ImageEntity image) {
+    public ResponseEntity<?> addImage(@RequestParam Long dishId, @RequestBody Image image) {
         try {
             imageService.addImage(dishId, image);
             return ResponseEntity.ok("Изображение было успешно сохранено");
@@ -46,7 +46,7 @@ public class ImageController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateImage(@RequestParam Long id, @RequestBody ImageEntity updatedImage) {
+    public ResponseEntity<?> updateImage(@RequestParam Long id, @RequestBody Image updatedImage) {
         try {
             imageService.updateImage(id, updatedImage);
             return ResponseEntity.ok("Изображение было успешно изменено");

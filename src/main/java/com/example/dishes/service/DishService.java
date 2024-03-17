@@ -1,14 +1,16 @@
 package com.example.dishes.service;
 
-import com.example.dishes.entity.DishEntity;
+import com.example.dishes.component.Cache;
+import com.example.dishes.entity.Dish;
 import com.example.dishes.exception.DishAlreadyExistException;
 import com.example.dishes.exception.DishNotFoundException;
-import com.example.dishes.model.Dish;
-import com.example.dishes.repository.DishRepos;
+import com.example.dishes.dto.DishDTO;
+import com.example.dishes.repository.DishRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,62 +18,91 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Component
 public class DishService {
 
     private final ObjectMapper objectMapper;
-    private final DishRepos dishRepos;
+    private final DishRepository dishRepository;
+    private final Cache<String, DishDTO> dishCache;
     private static final String MEALS_STRING = "meals";
     private static final String DISH_NOT_FOUND_STRING = "Блюдо не найдено";
 
     @Autowired
-    public DishService(ObjectMapper objectMapper, DishRepos dishRepos) {
+    public DishService(ObjectMapper objectMapper, DishRepository dishRepository, Cache<String, DishDTO> dishCache) {
         this.objectMapper = objectMapper;
-        this.dishRepos = dishRepos;
+        this.dishRepository = dishRepository;
+        this.dishCache = dishCache;
     }
 
-    public void addDish(DishEntity dish) throws DishAlreadyExistException {
-        if (dishRepos.findByName(dish.getName()) != null) {
+    public void addDish(Dish dish) throws DishAlreadyExistException {
+        if (dishRepository.findByName(dish.getName()) != null) {
             throw new DishAlreadyExistException("Такое блюдо уже существует");
         }
-        dishRepos.save(dish);
+        dishRepository.save(dish);
     }
 
-    public Dish getDish(String name) throws DishNotFoundException {
-        DishEntity dish = dishRepos.findByName(name);
-        if (dish == null) {
-            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
-        }
-        return Dish.toModel(dish);
-    }
-
-    public List<Dish> getByName(String name) throws DishNotFoundException, JsonProcessingException {
-
-        String apiUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + URLEncoder.encode(name, StandardCharsets.UTF_8);
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        String jsonString = restTemplate.getForObject(apiUrl, String.class);
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        JsonNode jsonNode = mapper.readTree(jsonString);
-
-        if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && !jsonNode.get(MEALS_STRING).isEmpty()) {
-            List<Dish> dishes = new ArrayList<>();
-            for (JsonNode mealNode : jsonNode.get(MEALS_STRING)) {
-                DishEntity dishEntity = new DishEntity(mealNode);
-                dishes.add(Dish.toOldModel(dishEntity));
-            }
-            return dishes;
+    public DishDTO getDish(String name) throws DishNotFoundException {
+        if (dishCache.containsKey(name)) {
+            return dishCache.get(name);
         } else {
-            throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
+            Dish dish = dishRepository.findByName(name);
+            if (dish == null) {
+                throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
+            }
+            DishDTO dishDTO = DishDTO.toModel(dish);
+            dishCache.put(name, dishDTO);
+            return dishDTO;
         }
     }
 
-    public void updateDish(String name, DishEntity dish) throws DishNotFoundException {
-        DishEntity dishEntity = dishRepos.findByName(name);
+    public List<DishDTO> getDishesWithIngredient(Long ingredientId) throws DishNotFoundException {
+        String cacheKey = "ingredient_" + ingredientId;
+        if (dishCache.containsKey(cacheKey)) {
+            return dishCache.getList(cacheKey);
+        } else {
+            List<Dish> dishes = dishRepository.findDishesByIngredientList_Id(ingredientId);
+            if (dishes.isEmpty()) {
+                throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
+            }
+            List<DishDTO> dishDTOs = dishes.stream().map(DishDTO::toModel).collect(Collectors.toList());
+            dishCache.putList(cacheKey, dishDTOs);
+            return dishDTOs;
+        }
+    }
+
+    public List<DishDTO> getByName(String name) throws DishNotFoundException, JsonProcessingException {
+
+        if (dishCache.containsKey(name)) {
+            return dishCache.getList(name);
+        } else {
+            String apiUrl = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + URLEncoder.encode(name, StandardCharsets.UTF_8);
+
+            RestTemplate restTemplate = new RestTemplate();
+
+            String jsonString = restTemplate.getForObject(apiUrl, String.class);
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            JsonNode jsonNode = mapper.readTree(jsonString);
+
+            if (jsonNode.has(MEALS_STRING) && jsonNode.get(MEALS_STRING).isArray() && !jsonNode.get(MEALS_STRING).isEmpty()) {
+                List<DishDTO> dishDTOS = new ArrayList<>();
+                for (JsonNode mealNode : jsonNode.get(MEALS_STRING)) {
+                    Dish dish = new Dish(mealNode);
+                    dishDTOS.add(DishDTO.toModel(dish));
+                }
+                return dishDTOS;
+            } else {
+                throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
+            }
+        }
+    }
+
+    public void updateDish(String name, Dish dish) throws DishNotFoundException {
+        Dish dishEntity = dishRepository.findByName(name);
         if (dishEntity == null) {
             throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }
@@ -79,13 +110,13 @@ public class DishService {
         dishEntity.setCountry(dish.getCountry());
         dishEntity.setCategory(dish.getCategory());
         dishEntity.setInstruction(dish.getInstruction());
-        dishRepos.save(dishEntity);
+        dishRepository.save(dishEntity);
     }
 
     public void deleteDish(Long id) throws DishNotFoundException {
-        DishEntity dishEntity = dishRepos.findById(id).orElse(null);
-        if (dishEntity != null) {
-            dishRepos.deleteById(id);
+        Dish dish = dishRepository.findById(id).orElse(null);
+        if (dish != null) {
+            dishRepository.deleteById(id);
         } else {
             throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
         }

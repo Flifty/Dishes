@@ -1,13 +1,13 @@
 package com.example.dishes.service;
 
-import com.example.dishes.entity.DishEntity;
-import com.example.dishes.entity.IngredientEntity;
+import com.example.dishes.entity.Dish;
+import com.example.dishes.entity.Ingredient;
 import com.example.dishes.exception.DishNotFoundException;
 import com.example.dishes.exception.IngredientNotFoundException;
 import com.example.dishes.exception.IngredientAlreadyExistException;
-import com.example.dishes.model.Ingredient;
-import com.example.dishes.repository.DishRepos;
-import com.example.dishes.repository.IngredientRepos;
+import com.example.dishes.dto.IngredientDTO;
+import com.example.dishes.repository.DishRepository;
+import com.example.dishes.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
@@ -15,52 +15,52 @@ import jakarta.transaction.Transactional;
 @Service
 public class IngredientService {
 
-    private final IngredientRepos ingredientRepos;
-    private final DishRepos dishRepos;
+    private final IngredientRepository ingredientRepository;
+    private final DishRepository dishRepository;
     private static final String INGREDIENT_NOT_FOUND_STRING = "Ингредиент не найден";
 
     @Autowired
-    public IngredientService(IngredientRepos ingredientRepos, DishRepos dishRepos) {
-        this.ingredientRepos = ingredientRepos;
-        this.dishRepos = dishRepos;
+    public IngredientService(IngredientRepository ingredientRepository, DishRepository dishRepository) {
+        this.ingredientRepository = ingredientRepository;
+        this.dishRepository = dishRepository;
     }
 
     @Transactional
-    public void addIngredient(Long dishId, IngredientEntity ingredient) throws DishNotFoundException, IngredientAlreadyExistException {
-        DishEntity dishEntity = dishRepos.findById(dishId).orElse(null);
-        if (dishEntity == null)
+    public void addIngredient(Long dishId, Ingredient ingredient) throws DishNotFoundException, IngredientAlreadyExistException {
+        Dish dish = dishRepository.findById(dishId).orElse(null);
+        if (dish == null)
             throw new DishNotFoundException("Не удалось добавить ингредиент. Блюдо не найдено");
 
-        if (dishEntity.getIngredientList().stream().anyMatch(existingIngredient -> existingIngredient.getName().equals(ingredient.getName()))) {
+        if (dish.getIngredientList().stream().anyMatch(existingIngredient -> existingIngredient.getName().equals(ingredient.getName()))) {
             throw new IngredientAlreadyExistException("Ингредиент уже есть в данном блюде");
         }
 
-        IngredientEntity existingIngredient = ingredientRepos.findByName(ingredient.getName());
+        Ingredient existingIngredient = ingredientRepository.findByName(ingredient.getName());
 
         if (existingIngredient != null) {
-            dishEntity.getIngredientList().add(existingIngredient);
+            dish.getIngredientList().add(existingIngredient);
         } else {
-            ingredientRepos.save(ingredient);
-            dishEntity.getIngredientList().add(ingredient);
+            ingredientRepository.save(ingredient);
+            dish.getIngredientList().add(ingredient);
         }
 
-        dishRepos.save(dishEntity);
+        dishRepository.save(dish);
     }
 
-    public Ingredient getIngredient(Long id) throws IngredientNotFoundException {
-        IngredientEntity ingredient = ingredientRepos.findById(id).orElse(null);
+    public IngredientDTO getIngredient(Long id) throws IngredientNotFoundException {
+        Ingredient ingredient = ingredientRepository.findById(id).orElse(null);
         if (ingredient != null) {
-            return Ingredient.toModel(ingredient);
+            return IngredientDTO.toModel(ingredient);
         } else {
             throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
         }
     }
 
-    public void updateIngredient(Long id, IngredientEntity ingredient) throws IngredientNotFoundException {
-        IngredientEntity ingredientEntity = ingredientRepos.findById(id).orElse(null);
+    public void updateIngredient(Long id, Ingredient ingredient) throws IngredientNotFoundException {
+        Ingredient ingredientEntity = ingredientRepository.findById(id).orElse(null);
         if (ingredientEntity != null) {
             ingredientEntity.setName(ingredient.getName());
-            ingredientRepos.save(ingredientEntity);
+            ingredientRepository.save(ingredientEntity);
         } else {
             throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
         }
@@ -68,17 +68,17 @@ public class IngredientService {
 
     @Transactional
     public void deleteIngredient(Long dishId, Long ingredientId) throws IngredientNotFoundException, DishNotFoundException {
-        DishEntity dishEntity = dishRepos.findById(dishId).orElse(null);
-        if (dishEntity == null)
+        Dish dish = dishRepository.findById(dishId).orElse(null);
+        if (dish == null)
             throw new DishNotFoundException("Блюдо не найдено");
 
-        IngredientEntity ingredientEntity = ingredientRepos.findById(ingredientId).orElse(null);
-        if (ingredientEntity == null)
+        Ingredient ingredient = ingredientRepository.findById(ingredientId).orElse(null);
+        if (ingredient == null)
             throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
 
-        dishEntity.getIngredientList().remove(ingredientEntity);
-        dishRepos.save(dishEntity);
-        ingredientEntity.getDishList().remove(dishEntity);
-        ingredientRepos.save(ingredientEntity);
+        dish.getIngredientList().remove(ingredient);
+        dishRepository.save(dish);
+        ingredient.getDishList().remove(dish);
+        ingredientRepository.save(ingredient);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.dishes.controller;
 
-import com.example.dishes.entity.IngredientEntity;
+import com.example.dishes.entity.Ingredient;
 import com.example.dishes.exception.DishNotFoundException;
 import com.example.dishes.exception.IngredientAlreadyExistException;
 import com.example.dishes.exception.IngredientNotFoundException;
@@ -21,7 +21,7 @@ public class IngredientController {
     private static final String ERROR_MESSAGE = "Произошла ошибка";
 
     @PostMapping
-    public ResponseEntity<?> addIngredient(@RequestParam Long dishId, @RequestBody IngredientEntity ingredient) {
+    public ResponseEntity<?> addIngredient(@RequestParam Long dishId, @RequestBody Ingredient ingredient) {
         try {
             ingredientService.addIngredient(dishId, ingredient);
             return ResponseEntity.ok("Ингредиент был успешно сохранен");
@@ -44,7 +44,7 @@ public class IngredientController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateIngredient(@RequestParam Long id, @RequestBody IngredientEntity updatedIngredient) {
+    public ResponseEntity<?> updateIngredient(@RequestParam Long id, @RequestBody Ingredient updatedIngredient) {
         try {
             ingredientService.updateIngredient(id, updatedIngredient);
             return ResponseEntity.ok("Ингредиент был успешно изменен");
