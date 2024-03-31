@@ -7,40 +7,40 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Cache<K, V> {
-    private static final int MAX_ENTRIES = 10;
+  private static final int MAX_ENTRIES = 10;
 
-    private final Map<K, Object> dishCache = new LinkedHashMap<>(MAX_ENTRIES, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_ENTRIES;
-        }
-    };
-
-    public void put(K key, V value) {
-        dishCache.put(key, value);
+  private final Map<K, Object> dishCache = new LinkedHashMap<>(MAX_ENTRIES, 0.75f, true) {
+    @Override
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+      return size() > MAX_ENTRIES;
     }
+  };
 
-    public void putList(K key, List<V> valueList) {
-        dishCache.put(key, valueList);
-    }
+  public void put(K key, V value) {
+    dishCache.put(key, value);
+  }
 
-    public V get(K key) {
-        return (V) dishCache.get(key);
-    }
+  public void putList(K key, List<V> valueList) {
+    dishCache.put(key, valueList);
+  }
 
-    public List<V> getList(K key) {
-        return (List<V>) dishCache.get(key);
-    }
+  public V get(K key) {
+    return (V) dishCache.get(key);
+  }
 
-    public boolean containsKey(K key) {
-        return dishCache.containsKey(key);
-    }
+  public List<V> getList(K key) {
+    return (List<V>) dishCache.get(key);
+  }
 
-    public void remove(K key) {
-        dishCache.remove(key);
-    }
+  public boolean containsKey(K key) {
+    return dishCache.containsKey(key);
+  }
 
-    public void clear() {
-        dishCache.clear();
-    }
+  public void remove(K key) {
+    dishCache.remove(key);
+  }
+
+  public void clear() {
+    dishCache.clear();
+  }
 }
