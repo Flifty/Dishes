@@ -33,7 +33,7 @@ public class ImageController {
   private static final String ERROR_MESSAGE = "Произошла ошибка";
 
   @PostMapping
-  public ResponseEntity<?> addImage(@RequestParam Long dishId, @RequestBody Image image) {
+  public ResponseEntity<String> addImage(@RequestParam Long dishId, @RequestBody Image image) {
     log.info("image post запрос был вызван");
     try {
       imageService.addImage(dishId, image);
@@ -48,7 +48,7 @@ public class ImageController {
 
 
   @GetMapping
-  public ResponseEntity<?> getImage(@RequestParam Long id) {
+  public ResponseEntity<String> getImage(@RequestParam Long id) {
     log.info("image get запрос был вызван");
     try {
       log.info("Изображение было успешно получено");
@@ -61,7 +61,7 @@ public class ImageController {
   }
 
   @PutMapping
-  public ResponseEntity<?> updateImage(@RequestParam Long id, @RequestBody Image updatedImage) {
+  public ResponseEntity<String> updateImage(@RequestParam Long id, @RequestBody Image updatedImage) {
     log.info("image put запрос был вызван");
     try {
       imageService.updateImage(id, updatedImage);
@@ -75,7 +75,7 @@ public class ImageController {
   }
 
   @DeleteMapping
-  public ResponseEntity<?> deleteImage(@RequestParam Long id) {
+  public ResponseEntity<String> deleteImage(@RequestParam Long id) {
     log.info("image delete запрос был вызван");
     try {
       imageService.deleteImage(id);
