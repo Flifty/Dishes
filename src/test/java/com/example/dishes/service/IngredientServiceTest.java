@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class IngredientServiceTest {
+class IngredientServiceTest {
 
   @Mock
   private IngredientRepository ingredientRepository;
