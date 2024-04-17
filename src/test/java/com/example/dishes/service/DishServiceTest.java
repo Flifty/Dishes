@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class DishServiceTest {
+class DishServiceTest {
 
   @Mock
   private DishRepository dishRepository;
@@ -36,7 +36,7 @@ public class DishServiceTest {
   }
 
   @Test
-  public void testAddDish() {
+  void testAddDish() {
     Dish dish = new Dish();
     dish.setName("Test Dish");
     dish.setCountry("Test Country");
@@ -53,7 +53,7 @@ public class DishServiceTest {
   }
 
   @Test
-  public void testGetDish() {
+  void testGetDish() {
     String dishName = "Test Dish";
     Dish dish = new Dish();
     dish.setName(dishName);
@@ -85,7 +85,7 @@ public class DishServiceTest {
 
 
   @Test
-  public void testGetDishesWithIngredient() {
+  void testGetDishesWithIngredient() {
     Long ingredientId = 123L;
     String cacheKey = "ingredient_" + ingredientId;
 
@@ -100,7 +100,7 @@ public class DishServiceTest {
   }
 
   @Test
-  public void testGetByName() throws DishNotFoundException {
+  void testGetByName() throws DishNotFoundException {
     String name = "Test Name";
 
     when(dishCache.containsKey(name)).thenReturn(true);
@@ -114,7 +114,7 @@ public class DishServiceTest {
   }
 
   @Test
-  public void testUpdateDish() throws DishNotFoundException {
+  void testUpdateDish() throws DishNotFoundException {
     String name = "Test Name";
     Dish dish = new Dish();
     dish.setName(name);
@@ -129,7 +129,7 @@ public class DishServiceTest {
   }
 
   @Test
-  public void testDeleteDish() throws DishNotFoundException {
+  void testDeleteDish() throws DishNotFoundException {
     Long id = 123L;
     Dish dish = new Dish();
     dish.setId(id);
