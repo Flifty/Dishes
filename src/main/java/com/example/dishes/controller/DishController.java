@@ -37,7 +37,7 @@ public class DishController {
   }
 
   @PostMapping
-  public ResponseEntity<?> addDish(@RequestBody Dish dish) {
+  public ResponseEntity<String> addDish(@RequestBody Dish dish) {
     log.info("dish post запрос был вызван");
     try {
       dishService.addDish(dish);
@@ -51,7 +51,7 @@ public class DishController {
   }
 
   @PostMapping("/bulk")
-  public ResponseEntity<?> addDishesBulk(@RequestBody List<Dish> dishes) {
+  public ResponseEntity<String> addDishesBulk(@RequestBody List<Dish> dishes) {
     log.info("dish bulk post запрос был вызван");
     try {
       List<String> errors = dishService.addDishesBulk(dishes);
@@ -65,7 +65,7 @@ public class DishController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getDish(@RequestParam(required = false) String name) {
+  public ResponseEntity<String> getDish(@RequestParam(required = false) String name) {
     log.info("dish get запрос был вызван");
     try {
       log.info(GETTING_SUCCESS_MESSAGE);
@@ -78,7 +78,7 @@ public class DishController {
   }
 
   @GetMapping("/with-ingredient")
-  public ResponseEntity<?> getDishesWithIngredient(@RequestParam Long ingredientId) {
+  public ResponseEntity<String> getDishesWithIngredient(@RequestParam Long ingredientId) {
     log.info("dish get /with-ingredient запрос был вызван");
     try {
       List<DishDTO> dishes = dishService.getDishesWithIngredient(ingredientId);
@@ -92,7 +92,7 @@ public class DishController {
   }
 
   @GetMapping("/name")
-  public ResponseEntity<?> getDishByName(@RequestParam String name) {
+  public ResponseEntity<String> getDishByName(@RequestParam String name) {
     log.info("dish get /name запрос был вызван");
     try {
       List<DishDTO> dishDto = dishService.getByName(name);
@@ -106,7 +106,7 @@ public class DishController {
   }
 
   @PutMapping
-  public ResponseEntity<?> updateDish(@RequestParam String name, @RequestBody Dish updatedDish) {
+  public ResponseEntity<String> updateDish(@RequestParam String name, @RequestBody Dish updatedDish) {
     log.info("dish put запрос был вызван");
     try {
       dishService.updateDish(name, updatedDish);
@@ -120,7 +120,7 @@ public class DishController {
   }
 
   @DeleteMapping
-  public ResponseEntity<?> deleteDish(@RequestParam Long id) {
+  public ResponseEntity<String> deleteDish(@RequestParam Long id) {
     log.info("dish delete запрос был вызван");
     try {
       dishService.deleteDish(id);
