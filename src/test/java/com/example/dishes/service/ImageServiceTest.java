@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class ImageServiceTest {
+class ImageServiceTest {
 
   @Mock
   private ImageRepository imageRepository;
