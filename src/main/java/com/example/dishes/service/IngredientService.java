@@ -74,19 +74,20 @@ public class IngredientService {
   @Transactional
   public void deleteIngredient(Long dishId, Long ingredientId)
       throws IngredientNotFoundException, DishNotFoundException {
-    Dish dish = dishRepository.findById(dishId).orElse(null);
-      if (dish == null) {
-          throw new DishNotFoundException("Блюдо не найдено");
-      }
-
     Ingredient ingredient = ingredientRepository.findById(ingredientId).orElse(null);
-      if (ingredient == null) {
-          throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
-      }
+    if (ingredient == null) {
+      throw new IngredientNotFoundException(INGREDIENT_NOT_FOUND_STRING);
+    }
+
+    Dish dish = dishRepository.findById(dishId).orElse(null);
+    if (dish == null) {
+      throw new DishNotFoundException("Блюдо не найдено");
+    }
 
     dish.getIngredientList().remove(ingredient);
     dishRepository.save(dish);
     ingredient.getDishList().remove(dish);
     ingredientRepository.save(ingredient);
   }
+
 }

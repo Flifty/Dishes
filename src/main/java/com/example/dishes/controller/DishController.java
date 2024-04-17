@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
-
+@RestController
 @RequestMapping("/dishes")
 public class DishController {
 
@@ -36,7 +37,7 @@ public class DishController {
   }
 
   @PostMapping
-  public ResponseEntity<String> addDish(@RequestBody Dish dish) {
+  public ResponseEntity<?> addDish(@RequestBody Dish dish) {
     log.info("dish post запрос был вызван");
     try {
       dishService.addDish(dish);
@@ -49,8 +50,22 @@ public class DishController {
     }
   }
 
+  @PostMapping("/bulk")
+  public ResponseEntity<?> addDishesBulk(@RequestBody List<Dish> dishes) {
+    log.info("dish bulk post запрос был вызван");
+    try {
+      List<String> errors = dishService.addDishesBulk(dishes);
+      if (!errors.isEmpty()) {
+        return ResponseEntity.badRequest().body(errors);    }
+      log.info("Блюда были успешно добавлены");
+      return ResponseEntity.ok("Блюда были успешно добавлены");
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(ERROR_MESSAGE);
+    }
+  }
+
   @GetMapping
-  public ResponseEntity<String> getDish(@RequestParam(required = false) String name) {
+  public ResponseEntity<?> getDish(@RequestParam(required = false) String name) {
     log.info("dish get запрос был вызван");
     try {
       log.info(GETTING_SUCCESS_MESSAGE);
@@ -63,7 +78,7 @@ public class DishController {
   }
 
   @GetMapping("/with-ingredient")
-  public ResponseEntity<String> getDishesWithIngredient(@RequestParam Long ingredientId) {
+  public ResponseEntity<?> getDishesWithIngredient(@RequestParam Long ingredientId) {
     log.info("dish get /with-ingredient запрос был вызван");
     try {
       List<DishDTO> dishes = dishService.getDishesWithIngredient(ingredientId);
@@ -77,7 +92,7 @@ public class DishController {
   }
 
   @GetMapping("/name")
-  public ResponseEntity<String> getDishByName(@RequestParam String name) {
+  public ResponseEntity<?> getDishByName(@RequestParam String name) {
     log.info("dish get /name запрос был вызван");
     try {
       List<DishDTO> dishDto = dishService.getByName(name);
@@ -91,7 +106,7 @@ public class DishController {
   }
 
   @PutMapping
-  public ResponseEntity<String> updateDish(@RequestParam String name, @RequestBody Dish updatedDish) {
+  public ResponseEntity<?> updateDish(@RequestParam String name, @RequestBody Dish updatedDish) {
     log.info("dish put запрос был вызван");
     try {
       dishService.updateDish(name, updatedDish);
@@ -105,7 +120,7 @@ public class DishController {
   }
 
   @DeleteMapping
-  public ResponseEntity<String> deleteDish(@RequestParam Long id) {
+  public ResponseEntity<?> deleteDish(@RequestParam Long id) {
     log.info("dish delete запрос был вызван");
     try {
       dishService.deleteDish(id);

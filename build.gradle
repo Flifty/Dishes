@@ -1,5 +1,7 @@
 plugins {
 	id 'java'
+	id 'jacoco'
+	id "org.sonarqube" version "4.4.1.3373"
 	id 'org.springframework.boot' version '3.2.2'
 	id 'io.spring.dependency-management' version '1.1.4'
 }
@@ -16,12 +18,14 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'mysql:mysql-connector-java'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'mysql:mysql-connector-java:8.0.30'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+	testImplementation 'org.mockito:mockito-core:3.12.4'
+	testImplementation "junit:junit:4.12"
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	//Swagger dependencies
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
@@ -29,10 +33,36 @@ dependencies {
 	implementation 'io.springfox:springfox-swagger2:3.0.0'
 	implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
 
+	implementation 'mysql:mysql-connector-java:8.0.30'
+	implementation 'org.projectlombok:lombok:1.18.30'
+	implementation 'joda-time:joda-time:2.2'
+	runtimeOnly 'mysql:mysql-connector-java'
+	implementation 'org.json:json:20240303'
 }
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
+	jacoco {
+		enabled = true
+	}
 }
 
+jacoco {
+	toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true
+	}
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "Flifty_Dishes"
+		property "sonar.organization", "flifty"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.token", "5b7c2e6c1bbc3d7a92699d7a5a0472bf43b8d850"
+	}
+}
 

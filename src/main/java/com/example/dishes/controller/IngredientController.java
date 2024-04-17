@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
+@RestController
 @RequestMapping("/ingredients")
 public class IngredientController {
 
@@ -31,7 +33,7 @@ public class IngredientController {
   private static final String ERROR_MESSAGE = "Произошла ошибка";
 
   @PostMapping
-  public ResponseEntity<String> addIngredient(@RequestParam Long dishId,
+  public ResponseEntity<?> addIngredient(@RequestParam Long dishId,
                                          @RequestBody Ingredient ingredient) {
     log.info("ingredient post запрос был вызван");
     try {
@@ -46,7 +48,7 @@ public class IngredientController {
   }
 
   @GetMapping
-  public ResponseEntity<String> getIngredient(@RequestParam Long id) {
+  public ResponseEntity<?> getIngredient(@RequestParam Long id) {
     log.info("ingredient get запрос был вызван");
     try {
       log.info("Ингредиент был успешно получен");
@@ -59,7 +61,7 @@ public class IngredientController {
   }
 
   @PutMapping
-  public ResponseEntity<String> updateIngredient(@RequestParam Long id,
+  public ResponseEntity<?> updateIngredient(@RequestParam Long id,
                                             @RequestBody Ingredient updatedIngredient) {
     log.info("ingredient put запрос был вызван");
     try {
@@ -74,7 +76,7 @@ public class IngredientController {
   }
 
   @DeleteMapping
-  public ResponseEntity<String> deleteIngredient(@RequestParam Long dishId,
+  public ResponseEntity<?> deleteIngredient(@RequestParam Long dishId,
                                             @RequestParam Long ingredientId) {
     log.info("ingredient delete запрос был вызван");
     try {

@@ -44,6 +44,20 @@ public class DishService {
     dishRepository.save(dish);
   }
 
+  public List<String> addDishesBulk(List<Dish> dishes) {
+    List<String> errors = new ArrayList<>();
+
+    dishes.stream()
+        .filter(dish -> dishRepository.findByName(dish.getName()) != null)
+        .forEach(dish -> errors.add("Блюдо '" + dish.getName() + "' уже существует"));
+
+    dishes.stream()
+        .filter(dish -> dishRepository.findByName(dish.getName()) == null)
+        .forEach(dish -> dishRepository.save(dish));
+
+    return errors;
+  }
+
   public DishDTO getDish(String name) throws DishNotFoundException {
     if (dishCache.containsKey(name)) {
       return dishCache.get(name);
