@@ -6,6 +6,7 @@ import com.example.dishes.entity.Dish;
 import com.example.dishes.exception.DishAlreadyExistException;
 import com.example.dishes.exception.DishNotFoundException;
 import com.example.dishes.repository.DishRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,10 +14,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class DishServiceTest {
@@ -53,6 +52,31 @@ class DishServiceTest {
   }
 
   @Test
+  void testAddDishesBulk() {
+    // Prepare dishes
+    List<Dish> dishes = new ArrayList<>();
+    Dish existingDish = new Dish();
+    existingDish.setName("Existing Dish");
+    Dish newDish = new Dish();
+    newDish.setName("New Dish");
+    dishes.add(existingDish);
+    dishes.add(newDish);
+
+    // Mock repository behavior
+    when(dishRepository.findByName("Existing Dish")).thenReturn(existingDish);
+    when(dishRepository.findByName("New Dish")).thenReturn(null);
+
+    // Call the method and assert the result
+    List<String> errors = dishService.addDishesBulk(dishes);
+    assertEquals(1, errors.size());
+    assertEquals("Блюдо 'Existing Dish' уже существует", errors.get(0));
+
+    // Verify repository save method is called only once
+    verify(dishRepository, times(1)).save(newDish);
+  }
+
+
+  @Test
   void testGetDish() {
     String dishName = "Test Dish";
     Dish dish = new Dish();
@@ -83,6 +107,28 @@ class DishServiceTest {
     assertThrows(DishNotFoundException.class, () -> dishService.getDish(dishName));
   }
 
+  @Test
+  void testGetDish_WhenCacheIsEmptyAndDishFoundInRepository() throws DishNotFoundException {
+    String name = "Test Dish";
+    Dish dish = new Dish();
+    dish.setName(name);
+    dish.setCountry("Test Country");
+    dish.setCategory("Test Category");
+    dish.setInstruction("Test Instruction");
+
+    when(dishCache.containsKey(name)).thenReturn(false);
+    when(dishRepository.findByName(name)).thenReturn(dish);
+
+    DishDTO result = dishService.getDish(name);
+
+    assertNotNull(result);
+    assertEquals(name, result.getName());
+    assertEquals("Test Country", result.getCountry());
+    assertEquals("Test Category", result.getCategory());
+    assertEquals("Test Instruction", result.getInstruction());
+
+    verify(dishCache, times(1)).put(name, result);
+  }
 
   @Test
   void testGetDishesWithIngredient() {
@@ -97,6 +143,54 @@ class DishServiceTest {
     when(dishRepository.findDishesByIngredientList_Id(ingredientId)).thenReturn(new ArrayList<>());
 
     assertThrows(DishNotFoundException.class, () -> dishService.getDishesWithIngredient(ingredientId));
+  }
+
+  @Test
+  void testGetDishesWithIngredient_WhenDishesExist() throws DishNotFoundException {
+    Long ingredientId = 1L;
+    String cacheKey = "ingredient_" + ingredientId;
+    List<Dish> dishes = new ArrayList<>();
+    Dish dish1 = new Dish();
+    dish1.setName("Dish 1");
+    Dish dish2 = new Dish();
+    dish2.setName("Dish 2");
+    dishes.add(dish1);
+    dishes.add(dish2);
+
+    when(dishCache.containsKey(cacheKey)).thenReturn(false);
+    when(dishRepository.findDishesByIngredientList_Id(ingredientId)).thenReturn(dishes);
+
+    List<DishDTO> dishDTOs = dishService.getDishesWithIngredient(ingredientId);
+
+    assertEquals(2, dishDTOs.size());
+    assertEquals("Dish 1", dishDTOs.get(0).getName());
+    assertEquals("Dish 2", dishDTOs.get(1).getName());
+
+    verify(dishCache, times(1)).putList(cacheKey, dishDTOs);
+  }
+
+  @Test
+  void testGetDishesWithIngredient_WhenCacheIsEmptyAndDishesFoundInRepository() throws DishNotFoundException {
+    Long ingredientId = 1L;
+    String cacheKey = "ingredient_" + ingredientId;
+    List<Dish> dishes = new ArrayList<>();
+    Dish dish1 = new Dish();
+    dish1.setName("Dish 1");
+    Dish dish2 = new Dish();
+    dish2.setName("Dish 2");
+    dishes.add(dish1);
+    dishes.add(dish2);
+
+    when(dishCache.containsKey(cacheKey)).thenReturn(false);
+    when(dishRepository.findDishesByIngredientList_Id(ingredientId)).thenReturn(dishes);
+
+    List<DishDTO> dishDTOs = dishService.getDishesWithIngredient(ingredientId);
+
+    assertEquals(2, dishDTOs.size());
+    assertEquals("Dish 1", dishDTOs.get(0).getName());
+    assertEquals("Dish 2", dishDTOs.get(1).getName());
+
+    verify(dishCache, times(1)).putList(cacheKey, dishDTOs);
   }
 
   @Test
@@ -143,6 +237,3 @@ class DishServiceTest {
     assertThrows(DishNotFoundException.class, () -> dishService.deleteDish(id));
   }
 }
-
-
-
