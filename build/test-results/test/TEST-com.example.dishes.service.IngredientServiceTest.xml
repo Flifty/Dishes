@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.dishes.service.IngredientServiceTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2024-05-14T19:45:01" hostname="DESKTOP-HRV2548" time="0.184">
+  <properties/>
+  <testcase name="testDeleteIngredient_DishNotFound()" classname="com.example.dishes.service.IngredientServiceTest" time="0.006"/>
+  <testcase name="testDeleteIngredient_Success()" classname="com.example.dishes.service.IngredientServiceTest" time="0.126"/>
+  <testcase name="testAddIngredient_IngredientAlreadyExist()" classname="com.example.dishes.service.IngredientServiceTest" time="0.005"/>
+  <testcase name="testAddIngredient_Success()" classname="com.example.dishes.service.IngredientServiceTest" time="0.005"/>
+  <testcase name="testGetIngredient_Success()" classname="com.example.dishes.service.IngredientServiceTest" time="0.005"/>
+  <testcase name="testDeleteIngredient_IngredientNotFound()" classname="com.example.dishes.service.IngredientServiceTest" time="0.004"/>
+  <testcase name="testGetIngredient_IngredientNotFound()" classname="com.example.dishes.service.IngredientServiceTest" time="0.004"/>
+  <testcase name="testUpdateIngredient_Success()" classname="com.example.dishes.service.IngredientServiceTest" time="0.003"/>
+  <testcase name="testAddIngredient_DishNotFound()" classname="com.example.dishes.service.IngredientServiceTest" time="0.003"/>
+  <testcase name="testUpdateIngredient_IngredientNotFound()" classname="com.example.dishes.service.IngredientServiceTest" time="0.004"/>
+  <system-out><![CDATA[2024-05-14T22:45:01.919+03:00  INFO 11020 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.dishes.service.IngredientServiceTest]: IngredientServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2024-05-14T22:45:01.922+03:00  INFO 11020 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.dishes.DishesApplication for test class com.example.dishes.service.IngredientServiceTest
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

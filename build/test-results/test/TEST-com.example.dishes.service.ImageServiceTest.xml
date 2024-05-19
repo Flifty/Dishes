@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.dishes.service.ImageServiceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2024-05-14T19:45:01" hostname="DESKTOP-HRV2548" time="0.072">
+  <properties/>
+  <testcase name="testAddImage_Success()" classname="com.example.dishes.service.ImageServiceTest" time="0.01"/>
+  <testcase name="testAddImage_DishNotFound()" classname="com.example.dishes.service.ImageServiceTest" time="0.005"/>
+  <testcase name="testAddImage_ImageAlreadyExist()" classname="com.example.dishes.service.ImageServiceTest" time="0.007"/>
+  <testcase name="testGetImage_ImageNotFound()" classname="com.example.dishes.service.ImageServiceTest" time="0.006"/>
+  <testcase name="testDeleteImage_ImageNotFound()" classname="com.example.dishes.service.ImageServiceTest" time="0.006"/>
+  <testcase name="testGetImage_Success()" classname="com.example.dishes.service.ImageServiceTest" time="0.005"/>
+  <testcase name="testUpdateImage_ImageNotFound()" classname="com.example.dishes.service.ImageServiceTest" time="0.004"/>
+  <testcase name="testDeleteImage_Success()" classname="com.example.dishes.service.ImageServiceTest" time="0.007"/>
+  <testcase name="testUpdateImage_Success()" classname="com.example.dishes.service.ImageServiceTest" time="0.006"/>
+  <system-out><![CDATA[2024-05-14T22:45:01.783+03:00  INFO 11020 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.dishes.service.ImageServiceTest]: ImageServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2024-05-14T22:45:01.801+03:00  INFO 11020 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.dishes.DishesApplication for test class com.example.dishes.service.ImageServiceTest
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
