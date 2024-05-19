@@ -38,7 +38,7 @@ const ContentContainer = styled.div`
     align-items: center;
     text-align: center;
     border-radius: 10px;
-    background-color: #00AAA9;
+    background-color: #D2B48C;
     padding: 20px;
     width: 50%;
     border: 2px solid black;
@@ -48,12 +48,15 @@ const ContentContainer = styled.div`
 const Title = styled.h1`
     font-size: 4rem;
     margin-bottom: 20px;
-    color: #fff;
+    color: #FFD700;
+    text-shadow: 3px 3px 0px #000000;
 `;
 
 const ButtonContainer = styled.div`
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     margin-top: 50px;
 `;
 
@@ -68,7 +71,7 @@ const Input = styled.input`
 const Button = styled.button`
     padding: 15px 30px;
     margin: 10px;
-    background-color: #00AAA9;
+    background-color: #D2B48C;
     color: #fff;
     border: 2px solid #000;
     border-radius: 5px;
@@ -76,22 +79,26 @@ const Button = styled.button`
     font-size: 24px;
     text-transform: uppercase;
     text-shadow: 1px 1px 1px #000;
+    width: 450px;
+    text-align: center;
 `;
 
 const DishInfo = styled.div`
     text-align: center;
     color: #fff;
-    background-color: #00AAA9;
+    background-color: #D2B48C;
     border-radius: 10px;
     padding: 20px;
     font-size: 36px;
     text-shadow: 1px 1px 1px #000;
+    height: 200px;
+    overflow: auto;
 `;
 
 const IngredientInfo = styled.div`
     text-align: center;
     color: #fff;
-    background-color: #00AAA9;
+    background-color: #D2B48C;
     border-radius: 10px;
     padding: 20px;
     font-size: 36px;
@@ -101,7 +108,7 @@ const IngredientInfo = styled.div`
 const SuccessMessage = styled.div`
     text-align: center;
     color: #fff;
-    background-color: #00AAA9;
+    background-color: #D2B48C;
     border-radius: 10px;
     padding: 20px;
     font-size: 36px;
@@ -118,7 +125,7 @@ const StartOverButton = styled(Button)`
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #800000;
+    background-color: #B22222;
 `;
 
 function App() {
@@ -198,7 +205,7 @@ function App() {
 
     const handleDeleteDish = async () => {
         try {
-            const response = await axios.delete(`http://localhost:8080/dishes`, { params: { id } });
+            const response = await axios.delete(`http://localhost:8080/dishes`, { params: { name } });
             console.log(response.data);
             setDish(null);
             setSuccess(true);
@@ -278,7 +285,7 @@ function App() {
                 )}
                 {step === 'delete' && (
                     <>
-                        <Input type="text" value={id} onChange={(e) => setId(e.target.value)} placeholder="Enter dish name" />
+                        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter dish name" />
                         <Button onClick={handleDeleteDish}>Delete Dish</Button>
                     </>
                 )}
@@ -322,7 +329,7 @@ function App() {
                         {error && <ErrorMessage>Error: {error}</ErrorMessage>}
                     </ContentContainer>
                 )}
-                <StartOverButton onClick={resetState}>Start Over</StartOverButton>
+                <StartOverButton onClick={resetState}>Back</StartOverButton>
             </Container>
         );
 }
