@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-//import Grid from '@mui/material/Grid';
-//import Card from '@mui/material/Card';
-//import CardContent from '@mui/material/CardContent';
-//import CardActions from '@mui/material/CardActions';
-//import Button from '@mui/material/Button';
 
 const Container = styled.div`
     background-image: url('/back.jpg');
@@ -35,34 +30,11 @@ const HeaderContainer = styled.div`
     z-index: 1;
 `;
 
-const ContentContainer = styled.div`
-    margin-top: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border-radius: 10px;
-    background-color: #D2B48C;
-    padding: 20px;
-    width: 50%;
-    border: 2px solid black;
-    box-sizing: border-box;
-`;
-
 const Title = styled.h1`
     font-size: 4rem;
     margin-bottom: 20px;
     color: #FFD700;
     text-shadow: 3px 3px 0px #000000;
-`;
-
-const ButtonContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 50px;
 `;
 
 const Input = styled.input`
@@ -125,33 +97,6 @@ const ErrorMessage = styled.div`
     margin-top: 10px;
 `;
 
-const DishInfoContainer = styled.div`
-  background-color: #D2B48C;
-  border-radius: 10px;
-  padding: 20px;
-  font-size: 36px;
-  text-shadow: 1px 1px 1px #000;
-  height: 200px;
-  overflow: auto;
-`;
-
-const IngredientInfoContainer = styled.div`
-  background-color: #D2B48C;
-  border-radius: 10px;
-  padding: 20px;
-  font-size: 36px;
-  text-shadow: 1px 1px 1px #000;
-`;
-
-const DishesListContainer = styled.div`
-  background-color: #D2B48C;
-  border-radius: 10px;
-  padding: 20px;
-  font-size: 36px;
-  text-shadow: 1px 1px 1px #000;
-`;
-
-
 const HomeButton = styled.button`
     position: fixed;
     top: 10px;
@@ -165,26 +110,6 @@ const HomeButton = styled.button`
     font-size: 18px;
     text-transform: uppercase;
     text-shadow: 1px 1px 1px #000;
-`;
-
-const DishesList = styled.ul`
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-`;
-
-const DishItem = styled.div`
-    background-color: #D2B48C;
-    border-radius: 10px;
-    padding: 15px;
-    width: 200px;
-    margin-right: 10px;
-    font-size: 24px;
-    text-shadow: 1px 1px 1px #000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 `;
 
 const ButtonGroup = styled.div`
@@ -238,6 +163,7 @@ function App() {
     const [error, setError] = useState(null);
     const [ingredientId, setIngredientId] = useState('');
     const [dishes, setDishes] = useState([]);
+    const [dishesWithIngredient, setDishesWithIngredient] = useState([]);
     const [ingredient, setIngredient] = useState(null);
     const [selectedDish, setSelectedDish] = useState(null);
 
@@ -257,22 +183,24 @@ function App() {
         setError(null);
         setIngredientId('');
         setDishes([]);
+        setDishesWithIngredient([]);
         setIngredient(null);
         setSelectedDish(null);
     };
 
     useEffect(() => {
-        const fetchDishes = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/dishes/all`);
-                setDishes(response.data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
         fetchDishes();
     }, []);
+
+    const fetchDishes = async () => {
+        try {
+                const response = await axios.get(`http://localhost:8080/dishes/all`);
+                setDishes(response.data);
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleAddDish = async () => {
         try {
@@ -288,18 +216,6 @@ function App() {
         }
     };
 
-    const handleGetDish = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/dishes?name=${name}`);
-            console.log(response.data);
-            setDish(response.data);
-            setStep('result');
-            setError(null);
-        } catch (error) {
-            setError(error.response?.data || 'An error occurred');
-        }
-    };
-
     const handleUpdateDish = async () => {
         try {
             const response = await axios.put(`http://localhost:8080/dishes?name=${name}`, { name: newName, country: newCountry, category: newCategory, instruction: newInstruction});
@@ -307,16 +223,15 @@ function App() {
             setStep('result');
             setSuccess(true);
             setError(null);
-
-            setDishes(prevDishes => prevDishes.map(dish => dish.id === response.data.id ? response.data : dish));
+            setSelectedDish(null);
         } catch (error) {
             setError(error.response?.data || 'An error occurred');
         }
     };
 
-    const handleDeleteDish = async () => {
+    const handleDeleteDish = async (id) => {
         try {
-            const response = await axios.delete(`http://localhost:8080/dishes`, { params: { name } });
+            const response = await axios.delete(`http://localhost:8080/dishes`, { params: { id } });
             console.log(response.data);
             setDish(null);
             setSuccess(true);
@@ -324,6 +239,7 @@ function App() {
             setStep('result');
 
             setDishes(prevDishes => prevDishes.filter(dish => dish.id !== response.data.id));
+            setSelectedDish(null);
         } catch (error) {
             setError(error.response?.data || 'An error occurred');
         }
@@ -337,7 +253,8 @@ function App() {
             setStep('result');
             setError(null);
         } catch (error) {
-            setError(error.response?.data || 'An error occurred');
+            setError(error.response.data.message);
+            setStep("result");
         }
     };
 
@@ -345,23 +262,12 @@ function App() {
         try {
             const response = await axios.get(`http://localhost:8080/dishes/with-ingredient?ingredientId=${ingredientId}`);
             console.log(response.data);
-            setDishes(response.data);
+            setDishesWithIngredient(response.data);
             setStep('result');
             setError(null);
         } catch (error) {
-            setError(error.response?.data || 'An error occurred');
-        }
-    };
-
-    const handleGetDishes = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/dishes`);
-            console.log(response.data);
-            setDishes(response.data);
-            setStep('result');
-            setError(null);
-        } catch (error) {
-            setError(error.response?.data || 'An error occurred');
+            setError(error.response.data.message);
+            setStep("result");
         }
     };
 
@@ -371,6 +277,7 @@ function App() {
     };
 
     const handleUpdateClick = (dish) => {
+        setSelectedDish(dish);
         setName(dish.name);
         setCountry(dish.country);
         setCategory(dish.category);
@@ -379,16 +286,25 @@ function App() {
         setStep('update');
     };
 
-    const handleDeleteClick = (id) => {
-        setId(id);
+    const handleDeleteClick = (dish) => {
+        setSelectedDish(dish);
+        setId(dish.id);
         setStep('delete');
+        //setDishes(dishes.filter(dish => dish.id !== id));
+        //resetState();
+        //fetchDishes();
+    };
+
+    const handleHomeClick = () => {
+        resetState();
+        fetchDishes();
     };
 
     return (
         <Container>
             <HeaderContainer>
                 <Title>Dish Application</Title>
-                <HomeButton onClick={resetState}>Home</HomeButton>
+                <HomeButton onClick={handleHomeClick}>Home</HomeButton>
             </HeaderContainer>
             {step === 'select' && (
                 <>
@@ -417,7 +333,7 @@ function App() {
                                     Update
                                 </UpdateButton>
                                 <DeleteButton
-                                    onClick={() => handleDeleteClick(dish.id)}
+                                    onClick={() => handleDeleteClick(dish)}
                                     disabled={step !== 'select'}
                                 >
                                     Delete
@@ -425,16 +341,6 @@ function App() {
                             </div>
                         ))}
                     </div>
-                </>
-            )}
-
-            {selectedDish && (
-                <>
-                    <div>Dish: {selectedDish.name}</div>
-                    <div>Country: {selectedDish.country}</div>
-                    <div>Category: {selectedDish.category}</div>
-                    <div>Instruction: {selectedDish.instruction}</div>
-                    <div>ID: {selectedDish.id}</div>
                 </>
             )}
 
@@ -484,7 +390,6 @@ function App() {
                 </>
             )}
 
-
             {step === 'add' && (
                 <>
                     <Input
@@ -514,6 +419,7 @@ function App() {
                     <Button onClick={handleAddDish}>Add Dish</Button>
                 </>
             )}
+
             {step === 'getIngredient' && (
                 <>
                     <Input
@@ -525,6 +431,7 @@ function App() {
                     <Button onClick={handleGetIngredient}>Get Ingredient</Button>
                 </>
             )}
+
             {step === 'getDishesWithIngredient' && (
                 <>
                     <Input
@@ -543,113 +450,31 @@ function App() {
                 <>
                     {success && <SuccessMessage>Dish was successfully processed!</SuccessMessage>}
                     {selectedDish && (
-                        <DishInfoContainer>
                             <DishInfo>
                                 <div>Dish: {selectedDish.name}</div>
                                 <div>Country: {selectedDish.country}</div>
                                 <div>Category: {selectedDish.category}</div>
                                 <div>Instruction: {selectedDish.instruction}</div>
                             </DishInfo>
-                        </DishInfoContainer>
                     )}
                     {ingredient && (
-                        <IngredientInfoContainer>
                             <IngredientInfo>
                                 <div>Ingredient: {ingredient.name}</div>
                             </IngredientInfo>
-                        </IngredientInfoContainer>
                     )}
-                    {dishes.length > 0 && (
-                        <DishesListContainer>
-                            <DishesListTitle>Dishes with this ingredient:</DishesListTitle>
-                            <DishesList>
-                                {dishes.map((dish) => (
-                                    <DishItem key={dish.id}>
-                                        <div>{dish.name}</div>
-                                    </DishItem>
-                                ))}
-                            </DishesList>
-                        </DishesListContainer>
-                    )}
+                    {dishesWithIngredient && dishesWithIngredient.map((dish, index) => (
+                        <DishInfo key={index}>
+                            <div>Dish: {dish.name}</div>
+                            <div>Country: {dish.country}</div>
+                            <div>Category: {dish.category}</div>
+                            <div>Instruction: {dish.instruction}</div>
+                        </DishInfo>
+                    ))}
                     {error && <ErrorMessage>Error: {error}</ErrorMessage>}
                 </>
             )}
-
         </Container>
     );
-
 }
 
 export default App;
-
-  @DeleteMapping
-  @CrossOrigin
-  public ResponseEntity<?> deleteDish(@RequestParam String name) {
-    log.info("dish delete запрос был вызван");
-    try {
-      dishService.deleteDish(name);
-      log.info("Блюдо было успешно удалено");
-      return ResponseEntity.ok("Блюдо было успешно удалено");
-    } catch (DishNotFoundException e) {
-      throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, e.getMessage());
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
-
-  @DeleteMapping("/id")
-  @CrossOrigin
-  public ResponseEntity<String> deleteDish(@RequestParam Long id) {
-    log.info("dish delete запрос был вызван");
-    try {
-      dishService.deleteDishId(id);
-      log.info("Блюдо было успешно удалено");
-      return ResponseEntity.ok("Блюдо было успешно удалено");
-    } catch (DishNotFoundException e) {
-      throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, e.getMessage());
-    } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
-
-public void deleteDish(String name) throws DishNotFoundException {
-    Dish dish = dishRepository.findByName(name);
-    if (dish != null) {
-      dishRepository.delete(dish);
-      dishCache.clear();
-    } else {
-      throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
-    }
-  }
-
-  public void deleteDishId(Long id) throws DishNotFoundException {
-    Dish dish = dishRepository.findById(id).orElse(null);
-    if (dish != null) {
-      dishRepository.deleteById(id);
-    } else {
-      throw new DishNotFoundException(DISH_NOT_FOUND_STRING);
-    }
-  }
-
-public List<DishDto> getAllDishes() {
-    Iterable<Dish> dishesIterable = dishRepository.findAll();
-    List<Dish> dishes = StreamSupport.stream(dishesIterable.spliterator(), false)
-            .collect(Collectors.toList());
-    List<DishDto> dishDtos = new ArrayList<>();
-    for (Dish dish : dishes) {
-      dishDtos.add(DishDto.toModel(dish));
-    }
-    return dishDtos;
-  }
-
-@GetMapping("/all")
-    @CrossOrigin
-    public ResponseEntity<?> getAllDishes() {
-        log.info("get all dishes request was called");
-        try {
-            log.info(GETTING_SUCCESS_MESSAGE);
-            return ResponseEntity.ok(dishService.getAllDishes());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(ERROR_MESSAGE);
-        }
-    }
