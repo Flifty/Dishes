@@ -69,7 +69,8 @@ sonar {
 jar {
     manifest {
         attributes(
-            'Main-Class': 'com.example.DishesApplication'
+            'Main-Class': 'com.example.DishesApplication',
+            'Class-Path': configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(' ')
         )
     }
 }
