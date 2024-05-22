@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 
@@ -30,34 +30,11 @@ const HeaderContainer = styled.div`
     z-index: 1;
 `;
 
-const ContentContainer = styled.div`
-    margin-top: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border-radius: 10px;
-    background-color: #D2B48C;
-    padding: 20px;
-    width: 50%;
-    border: 2px solid black;
-    box-sizing: border-box;
-`;
-
 const Title = styled.h1`
     font-size: 4rem;
     margin-bottom: 20px;
     color: #FFD700;
     text-shadow: 3px 3px 0px #000000;
-`;
-
-const ButtonContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 50px;
 `;
 
 const Input = styled.input`
@@ -120,12 +97,54 @@ const ErrorMessage = styled.div`
     margin-top: 10px;
 `;
 
-const StartOverButton = styled(Button)`
+const HomeButton = styled.button`
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background-color: #8B0000   ;
+    color: #fff;
+    border: 2px solid #000;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 1px #000;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+`;
+
+const UpdateButton = styled.button`
+    background-color: #FFD700;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+`;
+
+const DeleteButton = styled.button`
     background-color: #B22222;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 18px;
+    cursor: pointer;
+`;
+
+const DishesListTitle = styled.h2`
+    color: #FFD700;
+    text-shadow: 1px 1px 0px #000000;
+    margin-top: 20px;
+    margin-bottom: 10px;
 `;
 
 function App() {
@@ -144,7 +163,9 @@ function App() {
     const [error, setError] = useState(null);
     const [ingredientId, setIngredientId] = useState('');
     const [dishes, setDishes] = useState([]);
+    const [dishesWithIngredient, setDishesWithIngredient] = useState([]);
     const [ingredient, setIngredient] = useState(null);
+    const [selectedDish, setSelectedDish] = useState(null);
 
     const resetState = () => {
         setStep('select');
@@ -162,30 +183,35 @@ function App() {
         setError(null);
         setIngredientId('');
         setDishes([]);
+        setDishesWithIngredient([]);
         setIngredient(null);
+        setSelectedDish(null);
+    };
+
+    useEffect(() => {
+        fetchDishes();
+    }, []);
+
+    const fetchDishes = async () => {
+        try {
+                const response = await axios.get(`http://localhost:8080/dishes/all`);
+                console.log(response.data);
+                setDishes(response.data);
+
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleAddDish = async () => {
         try {
-            const response = await axios.post('http://localhost:8080/dishes', { name, country, category, instruction});
+            const response = await axios.post(`http://localhost:8080/dishes`, { name, country, category, instruction});
             console.log(response.data);
             setStep('result');
             setSuccess(true);
             setError(null);
-        } catch (error) {
-            setError(error.response?.data || 'An error occurred');
-        }
-    };
 
-
-    const handleGetDish = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/dishes?name=${name}`);
-            console.log(response.data);
-            setDish(response.data);
-            setStep('result');
-            //setDish(response.data);
-            setError(null);
+            setDishes(prevDishes => [...prevDishes, response.data]);
         } catch (error) {
             setError(error.response?.data || 'An error occurred');
         }
@@ -198,12 +224,14 @@ function App() {
             setStep('result');
             setSuccess(true);
             setError(null);
+            setSelectedDish(null);
         } catch (error) {
             setError(error.response?.data || 'An error occurred');
         }
     };
 
     const handleDeleteDish = async () => {
+        console.log(`Deleting dish with name: ${name}`);
         try {
             const response = await axios.delete(`http://localhost:8080/dishes`, { params: { name } });
             console.log(response.data);
@@ -211,10 +239,15 @@ function App() {
             setSuccess(true);
             setError(null);
             setStep('result');
+
+            setDishes(prevDishes => prevDishes.filter(dish => dish.id !== id));
+            setSelectedDish(null);
         } catch (error) {
+            console.log(`Error deleting dish: ${error.response?.data || 'An error occurred'}`);
             setError(error.response?.data || 'An error occurred');
         }
     };
+
 
     const handleGetIngredient = async () => {
         try {
@@ -224,7 +257,8 @@ function App() {
             setStep('result');
             setError(null);
         } catch (error) {
-            setError(error.response?.data || 'An error occurred');
+            setError(error.response.data.message);
+            setStep("result");
         }
     };
 
@@ -232,106 +266,225 @@ function App() {
         try {
             const response = await axios.get(`http://localhost:8080/dishes/with-ingredient?ingredientId=${ingredientId}`);
             console.log(response.data);
-            setDishes(response.data);
+            setDishesWithIngredient(response.data);
             setStep('result');
             setError(null);
         } catch (error) {
-            setError(error.response?.data || 'An error occurred');
+            setError(error.response.data.message);
+            setStep("result");
         }
     };
 
+    const handleDishClick = (dish) => {
+        setSelectedDish(dish);
+        setStep('result');
+    };
 
-        return (
-            <Container>
-                <HeaderContainer>
-                    <Title>Dish Application</Title>
-                </HeaderContainer>
-                {step === 'select' && (
-                    <>
-                        <ButtonContainer>
-                            <Button onClick={() => setStep('add')}>Add Dish</Button>
-                            <Button onClick={() => setStep('get')}>Get Dish</Button>
-                            <Button onClick={() => setStep('update')}>Update Dish</Button>
-                            <Button onClick={() => setStep('delete')}>Delete Dish</Button>
-                            <Button onClick={() => setStep('getIngredient')}>Get Ingredient</Button>
-                            <Button onClick={() => setStep('getDishesWithIngredient')}>Get Dishes With Ingredient</Button>
-                        </ButtonContainer>
-                    </>
-                )}
-                {step === 'add' && (
-                    <>
-                        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter dish name" />
-                        <Input type="text" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Enter dish country" />
-                        <Input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Enter dish category" />
-                        <Input type="text" value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="Enter dish instruction" />
-                        <Button onClick={handleAddDish}>Add Dish</Button>
-                    </>
-                )}
-                {step === 'get' && (
-                    <>
-                        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter dish name" />
-                        <Button onClick={handleGetDish}>Get Dish</Button>
-                    </>
-                )}
-                {step === 'update' && (
-                    <>
-                        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter dish name" />
-                        <Input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Enter new dish name" />
-                        <Input type="text" value={newCountry} onChange={(e) => setNewCountry(e.target.value)} placeholder="Enter new dish country" />
-                        <Input type="text" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="Enter new dish category" />
-                        <Input type="text" value={newInstruction} onChange={(e) => setNewInstruction(e.target.value)} placeholder="Enter new dish instruction" />
-                        <Button onClick={handleUpdateDish}>Update Dish</Button>
-                    </>
-                )}
-                {step === 'delete' && (
-                    <>
-                        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter dish name" />
-                        <Button onClick={handleDeleteDish}>Delete Dish</Button>
-                    </>
-                )}
-                {step === 'getIngredient' && (
-                    <>
-                        <Input type="text" value={ingredientId} onChange={(e) => setIngredientId(e.target.value)} placeholder="Enter ingredient ID" />
-                        <Button onClick={handleGetIngredient}>Get Ingredient</Button>
-                    </>
-                )}
-                {step === 'getDishesWithIngredient' && (
-                    <>
-                        <Input type="text" value={ingredientId} onChange={(e) => setIngredientId(e.target.value)} placeholder="Enter ingredient ID" />
-                        <Button onClick={getDishesWithIngredient}>Get Dishes With Ingredient</Button>
-                    </>
-                )}
-                {step === 'result' && (
-                    <ContentContainer>
-                        {success && <SuccessMessage>Dish was successfully processed!</SuccessMessage>}
-                        {dish && (
-                            <DishInfo>
-                                <div>Dish: {dish.name}</div>
-                                <div>Country: {dish.country}</div>
-                                <div>Category: {dish.category}</div>
-                                <div>Instruction: {dish.instruction}</div>
-                            </DishInfo>
-                        )}
-                        {dishes && dishes.map((dish, index) => (
-                            <DishInfo key={index}>
-                                <div>Dish: {dish.name}</div>
-                                <div>Country: {dish.country}</div>
-                                <div>Category: {dish.category}</div>
-                                <div>Instruction: {dish.instruction}</div>
-                            </DishInfo>
+    const handleUpdateClick = (dish) => {
+        setSelectedDish(dish);
+        setName(dish.name);
+        setCountry(dish.country);
+        setCategory(dish.category);
+        setInstruction(dish.instruction);
+        setId(dish.id);
+        setStep('update');
+    };
+
+    const handleDeleteClick = (dish) => {
+        setSelectedDish(dish);
+        setId(dish.id);
+        setName(dish.name);
+        console.log(`Preparing to delete dish with name: ${dish.name}`);
+        setStep('delete');
+    };
+
+
+    const handleHomeClick = () => {
+        resetState();
+        fetchDishes();
+    };
+
+    return (
+        <Container>
+            <HeaderContainer>
+                <Title>Dish Application</Title>
+                <HomeButton onClick={handleHomeClick}>Home</HomeButton>
+            </HeaderContainer>
+            {step === 'select' && (
+                <>
+                    <ButtonGroup>
+                        <Button onClick={() => setStep('add')}>Add Dish</Button>
+                        <Button onClick={() => setStep('getIngredient')}>Get Ingredient</Button>
+                        <Button onClick={() => setStep('getDishesWithIngredient')}>
+                            Get Dishes With Ingredient
+                        </Button>
+                    </ButtonGroup>
+                    <DishesListTitle>Dishes:</DishesListTitle>
+                    <div>
+                        {dishes.map((dish) => (
+                            <div key={dish.id} style={{ display: 'flex', alignItems: 'center' }}>
+                                <Button
+                                    onClick={() => handleDishClick(dish)}
+                                    style={{ marginRight: '10px', marginBottom: '10px' }}
+                                >
+                                    {dish.name}
+                                </Button>
+                                <UpdateButton
+                                    onClick={() => handleUpdateClick(dish)}
+                                    disabled={step !== 'select'}
+                                    style={{ marginRight: '10px' }}
+                                >
+                                    Update
+                                </UpdateButton>
+                                <DeleteButton
+                                    onClick={() => handleDeleteClick(dish)}
+                                    disabled={step !== 'select'}
+                                >
+                                    Delete
+                                </DeleteButton>
+                            </div>
                         ))}
-                        {ingredient && (
+                    </div>
+                </>
+            )}
+
+            {step === 'update' && (
+                <>
+                    {selectedDish && (
+                        <>
+                            <Input
+                                type="text"
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                                placeholder="Enter new dish name"
+                            />
+                            <Input
+                                type="text"
+                                value={newCountry}
+                                onChange={(e) => setNewCountry(e.target.value)}
+                                placeholder="Enter new dish country"
+                            />
+                            <Input
+                                type="text"
+                                value={newCategory}
+                                onChange={(e) => setNewCategory(e.target.value)}
+                                placeholder="Enter new dish category"
+                            />
+                            <Input
+                                type="text"
+                                value={newInstruction}
+                                onChange={(e) => setNewInstruction(e.target.value)}
+                                placeholder="Enter new dish instruction"
+                            />
+                            <Button onClick={handleUpdateDish}>Update Dish</Button>
+                        </>
+                    )}
+                </>
+            )}
+
+            {step === 'delete' && (
+                <>
+                    {selectedDish && (
+                        <>
+                            <p style={{
+                                color: 'white',
+                                fontSize: '36px',
+                                textShadow: '2px 2px 0px black, -2px -2px 0px black, 2px -2px 0px black, -2px 2px 0px black'
+                            }}>
+                                Are you sure you want to delete the dish "{selectedDish.name}"?
+                            </p>
+                            <Button onClick={handleDeleteDish}>Delete Dish</Button>
+                            <Button onClick={() => setStep('select')}>Cancel</Button>
+                        </>
+                    )}
+                </>
+            )}
+
+            {step === 'add' && (
+                <>
+                <Input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter dish name"
+                    />
+                    <Input
+                        type="text"
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        placeholder="Enter dish country"
+                    />
+                    <Input
+                        type="text"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        placeholder="Enter dish category"
+                    />
+                    <Input
+                        type="text"
+                        value={instruction}
+                        onChange={(e) => setInstruction(e.target.value)}
+                        placeholder="Enter dish instruction"
+                    />
+                    <Button onClick={handleAddDish}>Add Dish</Button>
+                </>
+            )}
+
+            {step === 'getIngredient' && (
+                <>
+                    <Input
+                        type="text"
+                        value={ingredientId}
+                        onChange={(e) => setIngredientId(e.target.value)}
+                        placeholder="Enter ingredient ID"
+                    />
+                    <Button onClick={handleGetIngredient}>Get Ingredient</Button>
+                </>
+            )}
+
+            {step === 'getDishesWithIngredient' && (
+                <>
+                    <Input
+                        type="text"
+                        value={ingredientId}
+                        onChange={(e) => setIngredientId(e.target.value)}
+                        placeholder="Enter ingredient ID"
+                    />
+                    <Button onClick={getDishesWithIngredient}>
+                        Get Dishes With Ingredient
+                    </Button>
+                </>
+            )}
+
+            {step === 'result' && (
+                <>
+                    {success && <SuccessMessage>Dish was successfully processed!</SuccessMessage>}
+                    {selectedDish && (
+                        <DishInfo>
+                            <div>Dish: {selectedDish.name}</div>
+                            <div>Country: {selectedDish.country}</div>
+                            <div>Category: {selectedDish.category}</div>
+                            <div>Instruction: {selectedDish.instruction}</div>
+                        </DishInfo>
+                    )}
+                    {ingredient && (
                             <IngredientInfo>
                                 <div>Ingredient: {ingredient.name}</div>
                             </IngredientInfo>
-
-                        )}
-                        {error && <ErrorMessage>Error: {error}</ErrorMessage>}
-                    </ContentContainer>
-                )}
-                <StartOverButton onClick={resetState}>Back</StartOverButton>
-            </Container>
-        );
+                    )}
+                    {dishesWithIngredient && dishesWithIngredient.map((dish, index) => (
+                        <DishInfo key={index}>
+                            <div>Dish: {dish.name}</div>
+                            <div>Country: {dish.country}</div>
+                            <div>Category: {dish.category}</div>
+                            <div>Instruction: {dish.instruction}</div>
+                        </DishInfo>
+                    ))}
+                    {error && <ErrorMessage>Error: {error}</ErrorMessage>}
+                </>
+            )}
+        </Container>
+    );
 }
 
 export default App;
